@@ -30,7 +30,6 @@ common lang
     -fprint-explicit-foralls -fprint-explicit-kinds -Wunused-do-bind
 
   default-extensions:
-    NoFieldSelectors
     NoStarIsType
     BangPatterns
     BinaryLiterals
@@ -70,7 +69,6 @@ common lang
     NamedWildCards
     NumericUnderscores
     OverloadedLabels
-    OverloadedRecordDot
     OverloadedStrings
     PackageImports
     PartialTypeSignatures
@@ -91,6 +89,8 @@ common lang
     TypeSynonymInstances
     UndecidableInstances
     ViewPatterns
+    NoFieldSelectors
+    OverloadedRecordDot
 
   default-language:   GHC2021
 
@@ -115,10 +115,10 @@ common dependencies
     , ply-plutarch
     , serialise
     , text
-    
+
 library
   import:          lang, dependencies
-  exposed-modules: 
+  exposed-modules:
     Utils
     YieldFarming
 
@@ -133,11 +133,11 @@ executable yield-farming
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
-  build-depends: 
+  build-depends:
     , base
     , data-default
-    , yield-farming
     , plutarch
     , ply-plutarch
+    , yield-farming
 
   hs-source-dirs: app
