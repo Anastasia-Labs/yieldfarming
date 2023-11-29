@@ -1,5 +1,5 @@
 cabal-version:      3.0
-name:               plutarch-template
+name:               yield-farming
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
@@ -94,34 +94,6 @@ common lang
 
   default-language:   GHC2021
 
-library
-  import:          lang
-  exposed-modules: 
-    Utils
-    YieldFarming
-  -- Compile
-
-  build-depends:
-    , aeson
-    , base
-    , base16-bytestring
-    , bytestring
-    , cardano-binary
-    , data-default
-    , plutarch
-    , plutarch-extra
-    , liqwid-plutarch-extra
-    , plutus-core
-    , plutus-ledger-api
-    , plutus-simple-model
-    , plutus-tx
-    , ply-core
-    , ply-plutarch
-    , serialise
-    , text
-
-  hs-source-dirs:  src
-
 common dependencies
   build-depends:
     , aeson
@@ -138,14 +110,21 @@ common dependencies
     , plutarch-extra
     , plutus-core
     , plutus-ledger-api
-    , plutus-simple-model
     , plutus-tx
     , ply-core
     , ply-plutarch
     , serialise
     , text
+    
+library
+  import:          lang, dependencies
+  exposed-modules: 
+    Utils
+    YieldFarming
 
-executable plutarch-template
+  hs-source-dirs:  src
+
+executable yield-farming
   import:         lang, dependencies
   main-is:        Main.hs
 
@@ -154,7 +133,11 @@ executable plutarch-template
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
-  build-depends: plutarch-template
-   
+  build-depends: 
+    , base
+    , data-default
+    , yield-farming
+    , plutarch
+    , ply-plutarch
 
   hs-source-dirs: app
