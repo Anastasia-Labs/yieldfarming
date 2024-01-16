@@ -1,11 +1,16 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
-module YieldFarming (pvalidateYieldFarmW) where
+module YieldFarming (
+  pvalidateYieldFarmW,
+  YieldFarmingDatum (..),
+  YieldFarmRedeemer (..),
+) where
 
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
 import Plutarch.Api.V1.Value
@@ -14,9 +19,18 @@ import Plutarch.Bool
 import Plutarch.DataRepr
 import Plutarch.Extra.ScriptContext (pfromPDatum, ptryFromInlineDatum)
 import Plutarch.Prelude
+import PlutusLedgerApi.V2 (
+  Address,
+  BuiltinByteString,
+  CurrencySymbol,
+  TokenName,
+ )
+import PlutusTx qualified
 import "liqwid-plutarch-extra" Plutarch.Extra.TermCont
 
 -- import qualified PlutusTx
+
+import Plutarch.Lift (PConstantDecl, PUnsafeLiftDecl (PLifted))
 import Plutarch.Unsafe (punsafeCoerce)
 
 pcountOfUniqueTokens ::
@@ -31,7 +45,16 @@ pcountOfUniqueTokens = phoistAcyclic $
      in pmatch val $ \(PValue val') ->
           pmatch val' $ \(PMap csPairs) -> pfoldl # plam (\acc x -> acc + (tokensLength # x)) # 0 # csPairs
 
-data PYieldFarmDatum (s :: S)
+data YieldFarmingDatum = YieldFarmingDatum
+  { owner :: Address
+  , lpCS :: CurrencySymbol
+  , lpTN :: TokenName
+  }
+  deriving stock (Generic, Eq, Show)
+
+PlutusTx.makeIsDataIndexed ''YieldFarmingDatum [('YieldFarmingDatum, 0)]
+
+newtype PYieldFarmDatum (s :: S)
   = PYieldFarmDatum
       ( Term
           s
@@ -50,6 +73,23 @@ instance DerivePlutusType PYieldFarmDatum where
 
 instance PTryFrom PData PYieldFarmDatum
 
+instance PUnsafeLiftDecl PYieldFarmDatum where type PLifted PYieldFarmDatum = YieldFarmingDatum
+deriving via (DerivePConstantViaData YieldFarmingDatum PYieldFarmDatum) instance PConstantDecl YieldFarmingDatum
+
+data YieldFarmRedeemer
+  = Terminate
+  | HarvestRewards {ownIndex :: Integer}
+  | AddRewards {ownIndex :: Integer, authIndex :: Integer}
+  deriving stock (Show, Eq, Generic)
+
+PlutusTx.makeIsDataIndexed
+  ''YieldFarmRedeemer
+  [ ('Terminate, 0)
+  , ('HarvestRewards, 1)
+  , ('AddRewards, 2)
+  ]
+PlutusTx.makeLift ''YieldFarmRedeemer
+
 data PYieldFarmRedeemer (s :: S)
   = PTerminate (Term s (PDataRecord '[]))
   | PHarvestRewards (Term s (PDataRecord '["ownIndex" ':= PInteger]))
@@ -61,6 +101,9 @@ instance DerivePlutusType PYieldFarmRedeemer where
   type DPTStrat _ = PlutusTypeData
 
 instance PTryFrom PData PYieldFarmRedeemer
+
+instance PUnsafeLiftDecl PYieldFarmRedeemer where type PLifted PYieldFarmRedeemer = YieldFarmRedeemer
+deriving via (DerivePConstantViaData YieldFarmRedeemer PYieldFarmRedeemer) instance PConstantDecl YieldFarmRedeemer
 
 ptryOwnInput :: (PIsListLike list PTxInInfo) => Term s (list PTxInInfo :--> PTxOutRef :--> PTxOut)
 ptryOwnInput = phoistAcyclic $
@@ -99,7 +142,6 @@ pharvestYieldFarm = phoistAcyclic $ plam $ \ownIndex oldDatum ctx ->
 
     ownInput <- pletFieldsC @'["address", "datum"] (ptryOwnInput # txInfo.inputs # ownRef)
     ownOutput <- pletFieldsC @'["address", "datum"] (pelemAt @PBuiltinList # ownIndex # txInfo.outputs)
-
     datum <- pletFieldsC @'["owner", "lpCS", "lpTN"] oldDatum
     ownerAddress <- pletC datum.owner
 
@@ -137,7 +179,6 @@ pvalidateYieldFarm = phoistAcyclic $ plam $ \batcherCS batcherTN datum redeemer 
   PAddRewards red -> pletFields @'["ownIndex", "authIndex"] red $ \redF ->
     paddYieldFarmRewards # batcherCS # batcherTN # redF.ownIndex # redF.authIndex # ctx
   PHarvestRewards r -> pharvestYieldFarm # (pfield @"ownIndex" # r) # datum # ctx
-
 pvalidateYieldFarmW :: Term s (PAsData PCurrencySymbol :--> PAsData PTokenName :--> PValidator)
 pvalidateYieldFarmW = phoistAcyclic $ plam $ \batcherCS batcherTN datum redeemer ctx ->
   let dat :: Term _ PYieldFarmDatum
