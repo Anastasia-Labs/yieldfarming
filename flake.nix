@@ -1,5 +1,5 @@
 {
-  description = "Direct Order Contracts";
+  description = "Yield farming contracts";
 
   nixConfig = {
     extra-experimental-features = [ "nix-command" "flakes" "ca-derivations" ];
@@ -8,7 +8,6 @@
     allow-import-from-derivation = "true";
     max-jobs = "auto";
     auto-optimise-store = "true";
-    bash-prompt = "\\[\\e[0;92m\\][\\[\\e[0;92m\\]nix develop:\\[\\e[0;92m\\]\\w\\[\\e[0;92m\\]]\\[\\e[0;92m\\]$ \\[\\e[0m\\]";
   };
 
   inputs = {
@@ -61,9 +60,9 @@
             extraHackageDeps = [
               "${inputs.liqwid-libs}/plutarch-quickcheck"
               "${inputs.liqwid-libs}/plutarch-context-builder"
+              "${inputs.liqwid-libs}/plutarch-unit"
               "${inputs.liqwid-libs}/liqwid-plutarch-extra"
               "${inputs.liqwid-libs}/liqwid-script-export"
-              "${inputs.liqwid-libs}/plutarch-unit"
               "${inputs.liqwid-libs.inputs.ply}/ply-core"
               "${inputs.liqwid-libs.inputs.ply}/ply-plutarch"
             ];
@@ -71,9 +70,9 @@
           ci.required = [ "all_onchain" ];
         };
 
-      flake.hydraJobs.x86_64-linux = (
-        self.checks.x86_64-linux
-        // self.packages.x86_64-linux
-      );
+      # flake.hydraJobs.x86_64-linux = (
+      #   self.checks.x86_64-linux
+      #   // self.packages.x86_64-linux
+      # );
     };
 }
