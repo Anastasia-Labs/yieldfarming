@@ -9,6 +9,7 @@
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Building and Developing](#building-and-developing)
+  - [Testing](#testing)
   - [Case study](#case-study)
 
 <!-- markdown-toc end -->
@@ -141,6 +142,10 @@ cabal test
 ```
 
 ![yield-farming.gif](/assets/images/yield-farming.gif)
+
+## Testing
+
+For comprehensive information on testing the Yield Farming implementation, including unit tests and property-based tests, please refer to our [test documentation](/test/README.md).
 
 # Case study
 
