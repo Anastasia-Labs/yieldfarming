@@ -12,22 +12,29 @@ The unit tests for Yield Farming are categorized under the "Yield Farming Unit T
 
 #### Termination of Yield Farming
 
--**Pass - Terminate Yield Farming**: Verifies that the termination of yield farming operations proceeds correctly under valid conditions.
--**Failure - Terminate Yield Farming - missing signature**: Tests the system's response to the absence of a required signature during termination.
--**Failure - Terminate Yield Farming - incorrect signature**: Ensures the system correctly rejects termination attempts with an incorrect signature.
+- **Pass - Terminate Yield Farming**: Verifies that the termination of yield farming operations proceeds correctly under valid conditions.
+
+- **Failure - Terminate Yield Farming - missing signature**: Tests the system's response to the absence of a required signature during termination.
+
+- **Failure - Terminate Yield Farming - incorrect signature**: Ensures the system correctly rejects termination attempts with an incorrect signature.
 
 #### Harvesting in Yield Farming
 
--**Pass - Harvest Yield Farming**: Confirms successful harvesting of rewards from yield farming under appropriate conditions.
--**Failure - Harvest Yield Farming - incorrect output datum**: Validates the system's ability to reject harvest operations with incorrect output data.
--**Failure - Harvest Yield Farming - miss owner's signature**: Tests the rejection of harvest operations missing the owner's signature.
--**Failure - Harvest Yield Farming - incorrect own index**: Ensures the system correctly handles harvest operations with an incorrect ownership index.
+- **Pass - Harvest Yield Farming**: Confirms successful harvesting of rewards from yield farming under appropriate conditions.
+
+- **Failure - Harvest Yield Farming - incorrect output datum**: Validates the system's ability to reject harvest operations with incorrect output data.
+
+- **Failure - Harvest Yield Farming - miss owner's signature**: Tests the rejection of harvest operations missing the owner's signature.
+
+- **Failure - Harvest Yield Farming - incorrect own index**: Ensures the system correctly handles harvest operations with an incorrect ownership index.
 
 #### Adding Rewards to Yield Farming
 
--**Pass - Add Rewards Yield Farming**: Verifies the correct addition of rewards to the yield farming pool.
--**Failure - Add Rewards Yield Farming - incorrect output value**: Tests the system's response to incorrect output values during reward addition.
--**Failure - Add Rewards Yield Farming - incorrect auth index**: Validates the rejection of reward additions with an incorrect authorization index.
+- **Pass - Add Rewards Yield Farming**: Verifies the correct addition of rewards to the yield farming pool.
+
+- **Failure - Add Rewards Yield Farming - incorrect output value**: Tests the system's response to incorrect output values during reward addition.
+
+- **Failure - Add Rewards Yield Farming - incorrect auth index**: Validates the rejection of reward additions with an incorrect authorization index.
 
 ### Running the Tests
 
