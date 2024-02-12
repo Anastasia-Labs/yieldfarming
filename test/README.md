@@ -52,10 +52,9 @@ All tests, including both successful operations and failure scenarios, passed su
 The entire test suite was executed in approximately 0.06 seconds, demonstrating the efficiency of the Yield Farming feature's testing process.
 
 ```markdown
-Test suite yield-farming-test: RUNNING...
 Unit Test Group
   Yield Farming Unit Test
-    Pass - Terminate Yield Farming:                               OK (0.05s)
+    Pass - Terminate Yield Farming:                               OK (0.03s)
     Failure - Terminate Yield Farming - missing signature:        OK
     Failure - Terminate Yield Farming - incorrect signature:      OK
     Pass - Harvest Yield Farming:                                 OK
@@ -65,8 +64,13 @@ Unit Test Group
     Pass - Add Rewards Yield Farming:                             OK
     Failure - Add Rewards Yield Farming - incorrect output value: OK
     Failure - Add Rewards Yield Farming - incorrect auth index:   OK
+  Yield Farming Properties
+    True when valid terminate:                                    OK (0.06s)
+      +++ OK, passed 100 tests.
+    False when invalid terminate:                                 OK (0.06s)
+      +++ OK, passed 100 tests.
 
-All 10 tests passed (0.06s)
+All 12 tests passed (0.16s)
 Test suite yield-farming-test: PASS
 ```
 

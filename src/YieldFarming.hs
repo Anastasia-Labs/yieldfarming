@@ -8,6 +8,7 @@
 
 module YieldFarming (
   pvalidateYieldFarmW,
+  pterminateYieldFarming,
   YieldFarmingDatum (..),
   YieldFarmRedeemer (..),
 ) where
@@ -123,7 +124,7 @@ ptryOwnInput = phoistAcyclic $
 pheadSingleton :: (PListLike list, PElemConstraint list a) => Term s (list a :--> a)
 pheadSingleton = phoistAcyclic $
   plam $ \xs ->
-    pelimList (\x xs -> (pelimList (\_ _ -> perror) x xs)) perror xs
+    pelimList (\x xs -> pelimList (\_ _ -> perror) x xs) perror xs
 
 pterminateYieldFarming :: Term s (PYieldFarmDatum :--> PScriptContext :--> PBool)
 pterminateYieldFarming = phoistAcyclic $ plam $ \datum ctx -> unTermCont $ do
