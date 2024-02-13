@@ -1,5 +1,6 @@
-module Spec.YieldFarmingSpec (unitTest) where
+module Spec.YieldFarmingSpec (unitTest, yieldFarmingProperties) where
 
+import Data.ByteString.Char8 (pack)
 import Plutarch.Context (
   UTXO,
   address,
@@ -14,10 +15,11 @@ import Plutarch.Context (
  )
 import Plutarch.Prelude
 import Plutarch.Test.Precompiled (Expectation (Failure, Success), testEvalCase, tryFromPTerm)
+import Plutarch.Test.QuickCheck (fromPFun)
 import PlutusLedgerApi.V2 (
   Address (..),
   Credential (..),
-  CurrencySymbol,
+  CurrencySymbol (..),
   PubKeyHash (..),
   ScriptContext,
   ScriptHash (..),
@@ -27,8 +29,10 @@ import PlutusLedgerApi.V2 (
   singleton,
  )
 import PlutusTx qualified
-import Test.Tasty (TestTree)
-import YieldFarming (YieldFarmRedeemer (..), YieldFarmingDatum (..), pvalidateYieldFarmW)
+import PlutusTx.Builtins (BuiltinByteString, toBuiltin)
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.QuickCheck (Gen, Property, elements, forAll, suchThat, testProperty, vectorOf)
+import YieldFarming
 
 currencySymbol :: CurrencySymbol
 currencySymbol = "746fa3ba2daded6ab9ccc1e39d3835aa1dfcb9b5a54acc2ebe6b79a4"
@@ -317,4 +321,50 @@ unitTest = tryFromPTerm "Yield Farming Unit Test" (pvalidateYieldFarmW # pdata (
     [ PlutusTx.toData datum
     , PlutusTx.toData addRewardsRedeemer
     , PlutusTx.toData incorrectAuthIndexAddRewardScriptContext
+    ]
+
+-- Generator for a BuiltinByteString based on a subset of characters
+genBuiltinByteString :: Gen BuiltinByteString
+genBuiltinByteString = do
+  member <- vectorOf 32 $ elements (['a' .. 'f'] ++ ['0' .. '9']) -- Hexadecimal representation
+  return $ toBuiltin . pack $ member
+
+genDatum :: Gen (YieldFarmingDatum, ScriptContext, ScriptContext)
+genDatum = do
+  cs <- CurrencySymbol <$> genBuiltinByteString
+  tn <- TokenName <$> genBuiltinByteString
+  pkh <- PubKeyHash <$> genBuiltinByteString
+  fakepkh <- (PubKeyHash <$> genBuiltinByteString) `suchThat` (/= pkh)
+  return
+    ( YieldFarmingDatum
+        { owner = Address (PubKeyCredential pkh) Nothing
+        , lpCS = cs
+        , lpTN = tn
+        }
+    , buildSpending' $
+        mconcat
+          [ signedWith pkh
+          ]
+    , buildSpending' $
+        mconcat
+          [ signedWith fakepkh
+          ]
+    )
+
+prop_valid_terminate :: Property
+prop_valid_terminate = forAll genDatum $ \(datum, ctx, _) ->
+  fromPFun $
+    pterminateYieldFarming # pconstant datum # pconstant ctx
+
+prop_invalid_terminate :: Property
+prop_invalid_terminate = forAll genDatum $ \(datum, _, invalidCtx) ->
+  fromPFun $
+    pnot #$ pterminateYieldFarming # pconstant datum # pconstant invalidCtx
+
+yieldFarmingProperties :: TestTree
+yieldFarmingProperties =
+  testGroup
+    "Yield Farming Properties"
+    [ testProperty "True when valid terminate" prop_valid_terminate
+    , testProperty "False when invalid terminate" prop_invalid_terminate
     ]
