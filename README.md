@@ -143,6 +143,13 @@ cabal test
 
 ![yield-farming.gif](/assets/images/yield-farming.gif)
 
+## Demeter Workspace 
+
+To provide a seamless experience for running and trying out our application, click the workspace button below. This will start a workspace in Demeter with our repository code automatically cloned.
+
+
+[![Code in Workspace](https://demeter.run/code/badge.svg)](https://demeter.run/code?repository=https://github.com/Anastasia-Labs/yieldfarming&template=plutus&size=large) 
+
 ## Testing
 
 For comprehensive information on testing the Yield Farming implementation, including unit tests and property-based tests, please refer to our [test documentation](/test/README.md).
